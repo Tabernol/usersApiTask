@@ -8,7 +8,7 @@ import java.time.LocalDate;
 
 @Data
 @Builder
-public class UserRequestDto {
+public class UserCreateRequestDto {
     @Email
     @NotBlank()
     private String email;

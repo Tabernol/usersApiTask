@@ -1,7 +1,7 @@
 databaseChangeLog:
   - include:
-      - file: db/changelog/db.changelog-create-schema.sql
-  - include:
       - file: db/changelog/db.changelog-create-table-users.sql
+  - include:
+      - file: db/changelog/db.changelog-insert-table-users.sql
 
 

@@ -4,7 +4,7 @@ age.minimum: 18
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/postgres
-    name: postgres
-    password: postgres
+    url: jdbc:mysql://localhost:3306/krasnopolskyi_task_users_api?createDatabaseIfNotExist=true
+    username: root
+    password: root
 

@@ -2,6 +2,8 @@ package com.krasnopolskyi.usersapitask.handler;
 
 import com.krasnopolskyi.usersapitask.exception.GlobalAppException;
 import com.krasnopolskyi.usersapitask.exception.MinimumAgeException;
+import com.krasnopolskyi.usersapitask.exception.UserAppException;
+import com.krasnopolskyi.usersapitask.exception.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -71,11 +73,21 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
      * @param request   The current web request.
      * @return ResponseEntity with a response for MinimumAgeException.
      */
-    @ExceptionHandler(MinimumAgeException.class)
+    @ExceptionHandler(UserAppException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<Object> handleValidateAgeException(
             GlobalAppException exception, WebRequest request) {
-        log.warn("age is less than required", exception);
+        log.warn("caused by " + exception.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                new ErrorResponse(HttpStatus.BAD_REQUEST.value(), exception.getMessage()));
+    }
+
+
+    @ExceptionHandler(ValidationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<Object> handleValidateEmailException(
+            GlobalAppException exception, WebRequest request) {
+        log.warn("email already exists", exception);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                 new ErrorResponse(HttpStatus.BAD_REQUEST.value(), exception.getMessage()));
     }
