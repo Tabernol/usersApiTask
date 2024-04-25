@@ -59,6 +59,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public User updateUser(Long id, UserUpdateRequestDto userDto) throws UserAppException {
         User user = getUserById(id);
+        validateAge(userDto.getBirthDate());
 
         user.setFirstname(userDto.getFirstname());
         user.setLastname(userDto.getLastname());
@@ -83,6 +84,7 @@ public class UserServiceImpl implements UserService {
         }
 
         if (userDto.getBirthDate() != null) {
+            validateAge(userDto.getBirthDate());
             user.setBirthDate(userDto.getBirthDate());
         }
         if (userDto.getAddress() != null) {
@@ -113,10 +115,12 @@ public class UserServiceImpl implements UserService {
 
 
     private void validateAge(LocalDate dateOfBirth) throws MinimumAgeException {
-        Period age = Period.between(dateOfBirth, LocalDate.now());
-        // Check if the person is  up to 18 years old
-        if (age.getYears() < minimumAge) {
-            throw new MinimumAgeException("Age up to 18 years. Sorry, but I couldn't register you");
+        if (dateOfBirth != null) {
+            Period age = Period.between(dateOfBirth, LocalDate.now());
+            // Check if the person is  up to 18 years old
+            if (age.getYears() < minimumAge) {
+                throw new MinimumAgeException("Age up to 18 years. Sorry, but I couldn't register you");
+            }
         }
     }
 

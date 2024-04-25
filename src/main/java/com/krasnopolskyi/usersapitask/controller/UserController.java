@@ -24,6 +24,11 @@ public class UserController {
 
     private final UserService userService;
 
+    @GetMapping("/{id}")
+    public ResponseEntity<User> getUser(@PathVariable("id") Long id) throws UserAppException {
+        return ResponseEntity.status(HttpStatus.OK).body(userService.getUserById(id));
+    }
+
     @PostMapping
     public ResponseEntity<User> createUser(@Validated @RequestBody UserCreateRequestDto userDto)
             throws MinimumAgeException, ValidationException {

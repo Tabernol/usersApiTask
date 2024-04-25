@@ -9,14 +9,11 @@ import java.time.LocalDate;
 @Builder
 public class UserUpdateRequestDto {
     @Size(min = 2, max = 64)
-    @NotBlank()
     private String firstname;
 
     @Size(min = 2, max = 64)
-    @NotBlank()
     private String lastname;
 
-    @NotNull
     @Past
     private LocalDate birthDate;
 
