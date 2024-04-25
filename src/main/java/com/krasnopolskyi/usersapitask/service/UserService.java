@@ -5,9 +5,8 @@ import com.krasnopolskyi.usersapitask.dto.UserUpdateRequestDto;
 import com.krasnopolskyi.usersapitask.exception.MinimumAgeException;
 import com.krasnopolskyi.usersapitask.exception.UserAppException;
 import com.krasnopolskyi.usersapitask.exception.ValidationException;
-import com.krasnopolskyi.usersapitask.model.User;
+import com.krasnopolskyi.usersapitask.entity.User;
 
-import java.time.LocalDate;
 import java.util.List;
 
 public interface UserService {
@@ -19,6 +18,8 @@ public interface UserService {
 
     User updateUser(Long id, UserUpdateRequestDto userDto) throws UserAppException;
 
-    List<User> getUsersByBirthDate(LocalDate from, LocalDate to); // two date between
+    User updateUserNotNullFields(Long id, UserUpdateRequestDto userDto) throws UserAppException;
+
+    List<User> getUsersByBirthDate(String from, String to) throws ValidationException; // two date between
 
 }

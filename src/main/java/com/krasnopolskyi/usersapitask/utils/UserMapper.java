@@ -1,8 +1,7 @@
-package com.krasnopolskyi.usersapitask.mapper;
+package com.krasnopolskyi.usersapitask.utils;
 
 import com.krasnopolskyi.usersapitask.dto.UserCreateRequestDto;
-import com.krasnopolskyi.usersapitask.dto.UserUpdateRequestDto;
-import com.krasnopolskyi.usersapitask.model.User;
+import com.krasnopolskyi.usersapitask.entity.User;
 
 public class UserMapper {
 

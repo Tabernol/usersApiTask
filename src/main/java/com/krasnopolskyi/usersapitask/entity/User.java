@@ -1,4 +1,4 @@
-package com.krasnopolskyi.usersapitask.model;
+package com.krasnopolskyi.usersapitask.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
