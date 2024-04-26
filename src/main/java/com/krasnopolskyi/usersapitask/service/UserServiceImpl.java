@@ -86,7 +86,6 @@ public class UserServiceImpl implements UserService {
         if (userDto.getLastname() != null) {
             user.setLastname(userDto.getLastname());
         }
-
         if (userDto.getBirthDate() != null) {
             validateAge(userDto.getBirthDate());
             user.setBirthDate(userDto.getBirthDate());

@@ -41,7 +41,6 @@ public class UserController {
             @Validated @RequestBody UserUpdateRequestDto userDto) throws UserAppException {
         User user = userService.updateUserNotNullFields(id, userDto);
         return ResponseEntity.status(HttpStatus.OK).body(user);
-
     }
 
     @PutMapping("/{id}")

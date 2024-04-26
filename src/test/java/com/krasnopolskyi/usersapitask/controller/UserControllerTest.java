@@ -3,11 +3,11 @@ package com.krasnopolskyi.usersapitask.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.krasnopolskyi.usersapitask.dto.UserCreateRequestDto;
+import com.krasnopolskyi.usersapitask.dto.UserUpdateRequestDto;
 import com.krasnopolskyi.usersapitask.entity.User;
 import com.krasnopolskyi.usersapitask.exception.UserAppException;
 import com.krasnopolskyi.usersapitask.exception.ValidationException;
 import com.krasnopolskyi.usersapitask.service.UserService;
-import com.krasnopolskyi.usersapitask.service.UserServiceImpl;
 import com.krasnopolskyi.usersapitask.utils.UserMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,8 +33,7 @@ import java.util.List;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith({MockitoExtension.class, SpringExtension.class})
@@ -178,14 +177,14 @@ class UserControllerTest {
     }
 
     @ParameterizedTest
-    @CsvFileSource(resources = "/user_data.csv", numLinesToSkip = 1)
+    @CsvFileSource(resources = "/user_create_data_valid.csv", numLinesToSkip = 1)
     void testCreateUser_ReturnUser_ValidDto(String email,
                                             String firstname,
                                             String lastname,
                                             String birthDate,
                                             String address,
                                             String phoneNumber) throws Exception {
-
+        //Arrange
         UserCreateRequestDto userDto = UserCreateRequestDto.builder()
                 .email(email)
                 .firstname(firstname)
@@ -198,6 +197,7 @@ class UserControllerTest {
         User currentUser = UserMapper.mapToUser(userDto);
         when(userService.createUser(any(UserCreateRequestDto.class))).thenReturn(currentUser);
 
+        // Act&Assert
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(userDto)))
@@ -209,14 +209,14 @@ class UserControllerTest {
     }
 
     @ParameterizedTest
-    @CsvFileSource(resources = "/user_data_invalid.csv", numLinesToSkip = 1)
+    @CsvFileSource(resources = "/user_create_data_invalid.csv", numLinesToSkip = 1)
     void testCreateUser_ThrowException_InValidDto(String email,
                                                   String firstname,
                                                   String lastname,
                                                   String birthDate,
                                                   String address,
                                                   String phoneNumber) throws Exception {
-
+        //Arrange
         UserCreateRequestDto userDto = UserCreateRequestDto.builder()
                 .email(email)
                 .firstname(firstname)
@@ -226,13 +226,86 @@ class UserControllerTest {
                 .phoneNumber(phoneNumber)
                 .build();
 
-        User currentUser = UserMapper.mapToUser(userDto);
-
+        // Act&Assert
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(userDto)))
                 .andExpect(status().isBadRequest());
 
         verify(userService, never()).createUser(any(UserCreateRequestDto.class));
+    }
+
+    @Test
+    void testUpdatePatchUser_ReturnUser_ValidDto() throws Exception {
+        //Arrange
+        UserUpdateRequestDto userDto = UserUpdateRequestDto.builder()
+                .firstname("NewName")
+                .build();
+        user.setFirstname("NewName");
+
+        when(userService.updateUserNotNullFields(anyLong(), any(UserUpdateRequestDto.class))).thenReturn(user);
+
+        // Act&Assert
+        mockMvc.perform(patch("/users/{id}", 1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(userDto)))
+                .andExpect(status().isOk())
+                // Assert that the response JSON contains the expected firstname
+                .andExpect(jsonPath("$.firstname").value("NewName"))
+                .andExpect(jsonPath("$.lastname").value(user.getLastname()));
+    }
+
+    @Test
+    void testUpdatePatchUser_ThrowException_InValidDto() throws Exception {
+        //Arrange
+        UserUpdateRequestDto userDto = UserUpdateRequestDto.builder()
+                .firstname("N")
+                .build();
+
+        // Act&Assert
+        mockMvc.perform(patch("/users/{id}", 1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(userDto)))
+                .andExpect(status().isBadRequest());
+        verify(userService, never()).updateUserNotNullFields(anyLong(), any(UserUpdateRequestDto.class));
+    }
+
+    @Test
+    void testUpdatePutUser_ReturnUser_ValidDto() throws Exception {
+        //Arrange
+        UserUpdateRequestDto userDto = UserUpdateRequestDto.builder()
+                .firstname("NewName")
+                .lastname("Smith")
+                .build();
+
+        user.setFirstname("NewName");
+        user.setLastname("Smith");
+
+        when(userService.updateUser(anyLong(), any(UserUpdateRequestDto.class))).thenReturn(user);
+
+        // Act&Assert
+        mockMvc.perform(put("/users/{id}", 1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(userDto)))
+                .andExpect(status().isOk())
+                // Assert that the response JSON contains the expected firstname
+                .andExpect(jsonPath("$.firstname").value("NewName"))
+                .andExpect(jsonPath("$.lastname").value("Smith"));
+    }
+
+    @Test
+    void testUpdatePutUser_ThrowException_InValidDto() throws Exception {
+        //Arrange
+        UserUpdateRequestDto userDto = UserUpdateRequestDto.builder()
+                .firstname("N")
+                .build();
+
+        // Act&Assert
+        mockMvc.perform(put("/users/{id}", 1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(userDto)))
+                .andExpect(status().isBadRequest());
+
+        when(userService.updateUser(anyLong(), any(UserUpdateRequestDto.class))).thenReturn(user);
     }
 }
