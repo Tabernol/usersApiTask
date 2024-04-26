@@ -1,0 +1,19 @@
+email,firstname,lastname,birthDate,address,phoneNumber
+"invalidemail",John,Doe,1990-01-01,123 Main St,1234567890
+invalid@@d.com,John,Doe,1990-01-01,123 Main St,1234567890
+invalid.email@,John,Doe,1990-01-01,123 Main St,1234567890
+invalid.email@domain.,John,Doe,1990-01-01,123 Main St,1234567890
+invalid@email@domain.com,John,Doe,1990-01-01,123 Main St,1234567890
+invalid.email@domain(com,John,Doe,1990-01-01,123 Main St,1234567890
+"john.doe@example.com","",Doe,1990-01-01,123 Main St,1234567890
+"john.doe@example.com",John,"",1990-01-01,123 Main St,1234567890
+"john.doe@example.com",John,Doe,2025-01-01,123 Main St,1234567890
+"john.doe@example.com",John,Doe,1990-01-01,"",1234567890
+"john.doe@example.com",John,Doe,1990-01-01,123 Main St,""
+janesmith@gmail.com,Jane,Smith,1985-05-10,456 Oak St,9876
+janesmith@gmail.com,J,Smith,1985-05-10,456 Oak St,9876543210
+janesmith@gmail.com,Jane,S,1985-05-10,456 Oak St,9876543210
+janesmith@gmail.com,Jane,Smith,1985-05-10,4,9876543210
+janesmith@gmail.com,Jane,Smith,1985-05-10,456 Oak St,98765432104564564576546856785675467456756745645645634
+janesmith@gmail.com,Janedsfsgdsdfgdfgsdfgdsfasdfasdfasfdasdfsfgdfgdfgdsfgdsdfgdfgdsfg,Smith,1985-05-10,456 Oak St,9876543210
+janesmith@gmail.com,Jane,Smithsdfgdghdfghdfghsdfgdsfgdsfgsdfdfssdfgsdfgdsfgdsfxfghdfghdfgf,1985-05-10,456 Oak St,9876543210
