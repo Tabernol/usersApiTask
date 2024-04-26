@@ -74,12 +74,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
      * @return ResponseEntity with a response for MinimumAgeException.
      */
     @ExceptionHandler(UserAppException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<Object> handleValidateAgeException(
-            GlobalAppException exception, WebRequest request) {
+            UserAppException exception, WebRequest request) {
         log.warn("caused by " + exception.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                new ErrorResponse(HttpStatus.BAD_REQUEST.value(), exception.getMessage()));
+        return ResponseEntity.status(HttpStatus.valueOf(exception.getExceptionStatus())).body(
+                new ErrorResponse(exception.getExceptionStatus(), exception.getMessage()));
     }
 
 
