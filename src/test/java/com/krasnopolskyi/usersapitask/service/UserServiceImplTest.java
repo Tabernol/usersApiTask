@@ -1,12 +1,14 @@
 package com.krasnopolskyi.usersapitask.service;
 
-import com.krasnopolskyi.usersapitask.dto.UserCreateRequestDto;
-import com.krasnopolskyi.usersapitask.dto.UserUpdateRequestDto;
+import com.krasnopolskyi.usersapitask.dto.UserPostRequestDto;
+import com.krasnopolskyi.usersapitask.dto.UserPatchRequestDto;
+import com.krasnopolskyi.usersapitask.dto.UserPutRequestDto;
 import com.krasnopolskyi.usersapitask.entity.User;
 import com.krasnopolskyi.usersapitask.exception.MinimumAgeException;
 import com.krasnopolskyi.usersapitask.exception.UserAppException;
 import com.krasnopolskyi.usersapitask.exception.ValidationException;
 import com.krasnopolskyi.usersapitask.repository.UserRepository;
+import com.krasnopolskyi.usersapitask.utils.UserValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,14 +31,16 @@ import static org.mockito.Mockito.*;
 class UserServiceImplTest {
     @Mock
     private UserRepository userRepository;
+    @Mock
+    private UserValidator userValidator;
     @InjectMocks
     private UserServiceImpl userService;
     private User user;
 
     @BeforeEach
     private void setUp() {
-        userService = new UserServiceImpl(userRepository);
-        ReflectionTestUtils.setField(userService, "minimumAge", 18); // mock value from application.yaml
+        userService = new UserServiceImpl(userRepository, userValidator);
+        ReflectionTestUtils.setField(userValidator, "minimumAge", 18); // mock value from application.yaml
         user = User.builder()
                 .id(1L)
                 .email("johngold@gold.ua")
@@ -162,7 +166,7 @@ class UserServiceImplTest {
     @Test
     void createUser_ReturnsUser_WhenValidDto() throws MinimumAgeException, ValidationException {
         // Arrange
-        UserCreateRequestDto userDto = UserCreateRequestDto.builder()
+        UserPostRequestDto userDto = UserPostRequestDto.builder()
                 .email("johngold@gold.ua")
                 .firstname("John")
                 .lastname("Gold")
@@ -177,6 +181,7 @@ class UserServiceImplTest {
 
         // Assert
         verify(userRepository, times(1)).save(any(User.class));
+        verify(userValidator, times(1)).validateEmail(anyString());
         assertEquals(userDto.getEmail(), result.getEmail());
         assertEquals(userDto.getFirstname(), result.getFirstname());
         assertEquals(userDto.getLastname(), result.getLastname());
@@ -186,9 +191,9 @@ class UserServiceImplTest {
     }
 
     @Test
-    void createUser_ThrowsMinimumAgeException_WhenUnderage() {
+    void createUser_ThrowsMinimumAgeException_WhenUnderage() throws MinimumAgeException {
         // Arrange
-        UserCreateRequestDto userDto = UserCreateRequestDto.builder()
+        UserPostRequestDto userDto = UserPostRequestDto.builder()
                 .email("johngold@gold.ua")
                 .firstname("John")
                 .lastname("Gold")
@@ -196,14 +201,17 @@ class UserServiceImplTest {
                 .address("Earth")
                 .phoneNumber("1234567890")
                 .build();
+
+        doThrow(new MinimumAgeException("Age up to 18 years. Sorry, but we couldn't register you"))
+                .when(userValidator).validateAge(any(LocalDate.class));
         // Act&Assert
         assertThrows(MinimumAgeException.class, () -> userService.createUser(userDto));
     }
 
     @Test
-    void createUser_ThrowsValidateException_WhenEmailExists() {
+    void createUser_ThrowsValidateException_WhenEmailExists() throws MinimumAgeException, ValidationException {
         // Arrange
-        UserCreateRequestDto userDto = UserCreateRequestDto.builder()
+        UserPostRequestDto userDto = UserPostRequestDto.builder()
                 .email("johngold@gold.ua")
                 .firstname("John")
                 .lastname("Gold")
@@ -211,7 +219,8 @@ class UserServiceImplTest {
                 .address("Earth")
                 .phoneNumber("1234567890")
                 .build();
-        when(userRepository.existsByEmail(anyString())).thenReturn(true);
+        doThrow(new ValidationException("The email address already exists."))
+                .when(userValidator).validateEmail(any(String.class));
 
         // Act&Assert
         assertThrows(ValidationException.class, () -> userService.createUser(userDto));
@@ -223,7 +232,7 @@ class UserServiceImplTest {
     void testUpdateUser_ReturnUser_ValidDto() throws UserAppException {
         // Arrange
         Long userId = 1L;
-        UserUpdateRequestDto userDto = UserUpdateRequestDto.builder()
+        UserPutRequestDto userDto = UserPutRequestDto.builder()
                 .firstname("John2")
                 .lastname("Doe")
                 .birthDate(LocalDate.of(1990, 5, 15))
@@ -235,7 +244,7 @@ class UserServiceImplTest {
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         // Act
-        User updatedUser = userService.updateUser(userId, userDto);
+        User updatedUser = userService.updatePut(userId, userDto);
 
         // Assert
         assertEquals(userId, updatedUser.getId());
@@ -254,7 +263,7 @@ class UserServiceImplTest {
     void testUpdateUser_ReturnUser_InValidDto() throws UserAppException {
         // Arrange
         Long userId = 1L;
-        UserUpdateRequestDto userDto = UserUpdateRequestDto.builder()
+        UserPutRequestDto userDto = UserPutRequestDto.builder()
                 .firstname("John2")
                 .lastname("Doe")
                 .birthDate(LocalDate.of(2010, 5, 15))
@@ -263,18 +272,21 @@ class UserServiceImplTest {
                 .build();
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        doThrow(new MinimumAgeException("Age up to 18 years. Sorry, but we couldn't register you"))
+                .when(userValidator).validateAge(any(LocalDate.class));
 
         // Act&Assert
-        assertThrows(MinimumAgeException.class, () -> userService.updateUser(userId, userDto));
+        assertThrows(MinimumAgeException.class, () -> userService.updatePut(userId, userDto));
         verify(userRepository, times(1)).findById(userId);
         verify(userRepository, never()).save(any(User.class));
     }
 
-    @Test//PATCH
+    @Test
+//PATCH
     void testUpdateUserNotNullFields_ReturnUser_ValidDto() throws UserAppException {
         // Arrange
         Long userId = 1L;
-        UserUpdateRequestDto userDto = UserUpdateRequestDto.builder()
+        UserPatchRequestDto userDto = UserPatchRequestDto.builder()
                 .firstname("Tom")
                 .birthDate(LocalDate.of(1990, 5, 15))
                 .phoneNumber("0987654321")
@@ -284,7 +296,7 @@ class UserServiceImplTest {
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         // Act
-        User updatedUser = userService.updateUserNotNullFields(userId, userDto);
+        User updatedUser = userService.updatePatch(userId, userDto);
 
         // Assert
         assertEquals(userId, updatedUser.getId());
@@ -297,11 +309,13 @@ class UserServiceImplTest {
         verify(userRepository, times(1)).findById(userId);
         verify(userRepository, times(1)).save(any(User.class));
     }
-    @Test//PATCH
+
+    @Test
+//PATCH
     void testUpdateUserNotNullFields_ReturnUser_ValidDtoAnotherFields() throws UserAppException {
         // Arrange
         Long userId = 1L;
-        UserUpdateRequestDto userDto = UserUpdateRequestDto.builder()
+        UserPatchRequestDto userDto = UserPatchRequestDto.builder()
                 .lastname("Smith")
                 .address("Mars")
                 .build();
@@ -310,7 +324,7 @@ class UserServiceImplTest {
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         // Act
-        User updatedUser = userService.updateUserNotNullFields(userId, userDto);
+        User updatedUser = userService.updatePatch(userId, userDto);
 
         // Assert
         assertEquals(userId, updatedUser.getId());
@@ -329,17 +343,19 @@ class UserServiceImplTest {
     void testUpdateUserNotNullFields_ThrowException_InValidDto() throws UserAppException {
         // Arrange
         Long userId = 1L;
-        UserUpdateRequestDto userDto = UserUpdateRequestDto.builder()
+        UserPatchRequestDto userDto = UserPatchRequestDto.builder()
                 .firstname("Tom")
                 .birthDate(LocalDate.of(2020, 5, 15))
                 .phoneNumber("0987654321")
                 .build();
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        doThrow(new MinimumAgeException("Age up to 18 years. Sorry, but we couldn't register you"))
+                .when(userValidator).validateAge(any(LocalDate.class));
 
 
         // Act&Assert
-        assertThrows(MinimumAgeException.class, () -> userService.updateUserNotNullFields(userId, userDto));
+        assertThrows(MinimumAgeException.class, () -> userService.updatePatch(userId, userDto));
 
         verify(userRepository, times(1)).findById(userId);
         verify(userRepository, never()).save(any(User.class));

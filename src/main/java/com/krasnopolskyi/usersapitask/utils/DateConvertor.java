@@ -9,6 +9,10 @@ import java.time.format.DateTimeParseException;
 
 public class DateConvertor {
 
+    private DateConvertor() {
+        // Private constructor to prevent instantiation
+    }
+
     public static LocalDate convertDate(String date) throws ValidationException {
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
@@ -19,7 +23,7 @@ public class DateConvertor {
             // Parse the input date string into a LocalDate
             return LocalDate.parse(date, dateTimeFormatter);
         } catch (DateTimeParseException ex) {
-            throw new ValidationException("Date " + date + " is invalid, you should use pattern 'dd-MM-yyyy'", ex);
+            throw new ValidationException("Date " + date + " is invalid, you should use pattern 'yyyy-MM-dd'", ex);
         }
     }
 }

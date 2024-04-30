@@ -3,6 +3,7 @@ email,firstname,lastname,birthDate,address,phoneNumber
 invalid@@d.com,John,Doe,1990-01-01,123 Main St,1234567890
 invalid.email@,John,Doe,1990-01-01,123 Main St,1234567890
 invalid.email@domain.,John,Doe,1990-01-01,123 Main St,1234567890
+invalid.email@.domain.com,John,Doe,1990-01-01,123 Main St,1234567890
 invalid@email@domain.com,John,Doe,1990-01-01,123 Main St,1234567890
 invalid.email@domain(com,John,Doe,1990-01-01,123 Main St,1234567890
 "john.doe@example.com","",Doe,1990-01-01,123 Main St,1234567890

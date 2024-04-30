@@ -69,25 +69,48 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     /**
-     * @param exception The MinimumAgeException.
+     * Handles custom MinimumAgeException
+     *
+     * @param exception The MinimumAgeException
      * @param request   The current web request.
      * @return ResponseEntity with a response for MinimumAgeException.
      */
-    @ExceptionHandler(UserAppException.class)
+    @ExceptionHandler(MinimumAgeException.class)
     public ResponseEntity<Object> handleValidateAgeException(
             UserAppException exception, WebRequest request) {
         log.warn("caused by " + exception.getMessage());
-        return ResponseEntity.status(HttpStatus.valueOf(exception.getExceptionStatus())).body(
-                new ErrorResponse(exception.getExceptionStatus(), exception.getMessage()));
-    }
-
-
-    @ExceptionHandler(ValidationException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<Object> handleValidateEmailException(
-            GlobalAppException exception, WebRequest request) {
-        log.warn("email already exists", exception);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                 new ErrorResponse(HttpStatus.BAD_REQUEST.value(), exception.getMessage()));
+    }
+
+    /**
+     * Handles ValidationException thrown during email validation.
+     *
+     * @param exception The ValidationException that was thrown.
+     * @param request   The WebRequest associated with the request.
+     * @return A ResponseEntity with a status of BAD_REQUEST and an ErrorResponse containing
+     * the HTTP status code and the message from the ValidationException.
+     */
+    @ExceptionHandler(ValidationException.class)
+    public ResponseEntity<Object> handleValidateEmailException(
+            GlobalAppException exception, WebRequest request) {
+        log.warn("caused by " + exception.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                new ErrorResponse(HttpStatus.BAD_REQUEST.value(), exception.getMessage()));
+    }
+    /**
+     * Handles UserAppException thrown during user-related operations.
+     *
+     * @param exception The UserAppException that was thrown.
+     * @param request   The WebRequest associated with the request.
+     * @return A ResponseEntity with a status code specified by the exception, and an ErrorResponse
+     * containing the HTTP status code and the message from the UserAppException.
+     */
+    @ExceptionHandler(UserAppException.class)
+    public ResponseEntity<Object> handleUserAppException(
+            UserAppException exception, WebRequest request) {
+        log.warn("caused by " + exception.getMessage());
+        return ResponseEntity.status(exception.getExceptionStatus()).body(
+                new ErrorResponse(exception.getExceptionStatus(), exception.getMessage()));
     }
 }

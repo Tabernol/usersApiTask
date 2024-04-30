@@ -7,13 +7,16 @@ import lombok.Data;
 import java.time.LocalDate;
 @Data
 @Builder
-public class UserUpdateRequestDto {
+public class UserPutRequestDto {
     @Size(min = 2, max = 64)
+    @NotBlank()
     private String firstname;
 
     @Size(min = 2, max = 64)
+    @NotBlank()
     private String lastname;
 
+    @NotNull
     @Past
     private LocalDate birthDate;
 

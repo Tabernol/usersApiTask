@@ -5,23 +5,15 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDate;
-
 @Data
 @Builder
-public class UserCreateRequestDto {
-    @Email
-    @NotBlank()
-    private String email;
-
+public class UserPatchRequestDto {
     @Size(min = 2, max = 64)
-    @NotBlank()
     private String firstname;
 
     @Size(min = 2, max = 64)
-    @NotBlank()
     private String lastname;
 
-    @NotNull
     @Past
     private LocalDate birthDate;
 

@@ -1,5 +1,3 @@
-#spring.application.name=usersApiTask
-
 age.minimum: 18
 
 spring:
